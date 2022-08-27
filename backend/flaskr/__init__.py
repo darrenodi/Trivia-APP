@@ -52,11 +52,9 @@ def create_app(test_config=None):
       for category in categories:
           cat_dict[category.id] = category.type
 
-      # abort 404 if no categories found
       if (len(cat_dict) == 0):
           abort(404)
 
-      # return data to view
       return jsonify({
           'success': True,
           'categories': cat_dict
@@ -98,8 +96,7 @@ def create_app(test_config=None):
     """
     @app.route("/questions/<int:question_id>", methods=['DELETE'])
     def delete_question(question_id):
-      try:
-        
+      try:     
         question = Question.query.filter(Question.id == question_id).one_or_none()
 
         if question is None:
@@ -168,7 +165,7 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route("/questions/searchresult", methods=['POST'])
+    @app.route("/questions", methods=['POST'])
     def search_questions():
       body = request.get_json()
       search = body.get('searchTerm', None)
@@ -196,26 +193,25 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
-    @app.route("/categories/<int:id>/questions",methods=['GET'])
-    def get_questions_by_category(id):
-      category = Category.query.filter_by(id=id).one_or_none()
+    @app.route("/categories/<int:cat_id>/questions",methods=['GET'])
+    def get_questions_by_category(cat_id):
+      try:
+          selection = Question.query.filter(cat_id == Question.category).all()
+  
+          current_questions = paginate_questions(request, selection)
+          categories = Category.query.all()
 
-      # abort 400 for bad request if category isn't found
-      if (category is None):
-          abort(400)
+          if cat_id > len(categories):
+              abort(404)
 
-      selection = Question.query.filter_by(category=category.id).all()
-
-      # paginate the selection
-      paginated = paginate_questions(request, selection)
-
-      # return the results
-      return jsonify({
-          'success': True,
-          'questions': paginated,
-          'total_questions': len(Question.query.all()),
-          'current_category': category.type
-      })
+          return jsonify({
+                  "success": True,
+                  "questions": list(current_questions),
+                  "total_questions": len(selection),
+                  "current_category": [category.type for category in categories if category.id == cat_id ]
+              })
+      except:
+          abort(404)
     """
     @DONE:
     Create a POST endpoint to get questions to play the quiz.

@@ -19,11 +19,15 @@ class Question extends Component {
       <div className="Question-holder">
         <div className="Question">{question}</div>
         <div className="Question-status">
-          {/* <img
-            className='category'
+          <img
+            className="category"
             alt={`${category.toLowerCase()}`}
             src={`${category.toLowerCase()}.svg`}
-          /> */}
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src = "science.svg";
+            }}
+          />
           <div className="difficulty">Difficulty: {difficulty}</div>
           <div className="difficulty">Rating: {rating}</div>
           <img

@@ -143,7 +143,7 @@ class QuestionView extends Component {
               <li
                 key={id}
                 onClick={() => {
-                  this.getByCategory(id);
+                  this.getByCategory(parseInt(id) + 1);
                 }}
               >
                 {this.state.categories[id]}
@@ -151,6 +151,10 @@ class QuestionView extends Component {
                   className="category"
                   alt={`${this.state.categories[id].toLowerCase()}`}
                   src={`${this.state.categories[id].toLowerCase()}.svg`}
+                  onError={({ currentTarget }) => {
+                    currentTarget.onerror = null; // prevents looping
+                    currentTarget.src = "science.svg";
+                  }}
                 />
               </li>
             ))}
