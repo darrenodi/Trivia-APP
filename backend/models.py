@@ -5,8 +5,8 @@ from flask_migrate import Migrate
 import json
 
 database_name = 'trivia'
-username = "postgres"  #Enter your db username
-password = "Tantheta%401" #Enter your db password
+username = ""  #Enter your db username
+password = "" #Enter your db password
 database_path = "postgresql://{}:{}@{}/{}".format(
     username, password, "localhost:8080", database_name
 )
