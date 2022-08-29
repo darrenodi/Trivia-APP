@@ -139,7 +139,7 @@ def create_app(test_config=None):
       new_difficulty = body.get("difficulty",None)
       new_rating = body.get("rating",None)
       new_category = body.get("category",None)
-      search = body.get("query", None)
+      search = body.get("search", None)
 
       if search: 
         try:
