@@ -79,11 +79,15 @@ def create_app(test_config=None):
 
       if len(current_questions) == 0:
         abort(404)
+
+      cat_dict = {}
+      for category in categories:
+        cat_dict[category.id] = category.type
       
       return jsonify({
         "success":True,
         "questions": current_questions,
-        "categories": [cat.type for cat in categories],
+        "categories": cat_dict,
         "currentCategory": [],
         "total_questions": len(Question.query.all())
       })
@@ -135,7 +139,25 @@ def create_app(test_config=None):
       new_difficulty = body.get("difficulty",None)
       new_rating = body.get("rating",None)
       new_category = body.get("category",None)
-      if new_answer and new_category and new_rating and new_difficulty and new_answer:
+      search = body.get("query", None)
+
+      if search: 
+        try:
+          selection = Question.query.order_by(Question.id).filter(
+                    Question.question.ilike("%{}%".format(search))
+                )
+          current_questions = paginate_questions(request, selection)
+
+          return jsonify({
+            "success": True,
+            "questions": list(current_questions),
+            "total_questions": len(list(current_questions)),
+            "current_category": []
+                  })
+        except:
+          abort(422)
+
+      elif new_answer and new_category and new_rating and new_difficulty and new_answer:
         try:
           question = Question(question=new_question, rating=new_rating, answer=new_answer, difficulty=new_difficulty, category=new_category)
           question.insert()
@@ -165,25 +187,25 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route("/questions", methods=['POST'])
-    def search_questions():
-      body = request.get_json()
-      search = body.get('searchTerm', None)
+    # @app.route("/questions", methods=['POST'])
+    # def search_questions():
+    #   body = request.get_json()
+    #   search = body.get("search", None) 
+    #   print(search)
+    #   try:
+    #     if search: 
+    #       selection = Question.query.order_by(Question.id).all()
+    #       current_questions = paginate_questions(request, selection)
 
-      try:
-        if search:
-          selection = Question.query.filter(Question.question.ilike('%{}%'.format(search))).all()
-          current_cat = [question.format() for question in selection]
+    #       return jsonify({
+    #         "success": True,
+    #         "questions": list(current_questions),
+    #         "total_questions": len(selection),
+    #         "current_category": []
+    #               })
 
-          return jsonify({
-            'success': True,
-            'questions':current_cat,
-            'total_questions': len(selection),
-            'current_category':None # i have no idea what you mean about that ?
-          })
-
-      except:
-        abort(422)
+    #   except:
+    #       abort(422)
 
     """
     @DONE:
@@ -197,10 +219,10 @@ def create_app(test_config=None):
     def get_questions_by_category(cat_id):
       try:
           selection = Question.query.filter(cat_id == Question.category).all()
-  
+
           current_questions = paginate_questions(request, selection)
           categories = Category.query.all()
-
+          
           if cat_id > len(categories):
               abort(404)
 

@@ -83,13 +83,13 @@ class QuestionView extends Component {
     });
   };
 
-  submitSearch = (searchTerm) => {
+  submitSearch = (search) => {
     $.ajax({
       url: `/questions`, //TODO: update request URL
       type: "POST",
       dataType: "json",
       contentType: "application/json",
-      data: JSON.stringify({ searchTerm: searchTerm }),
+      data: JSON.stringify({ search: search }),
       xhrFields: {
         withCredentials: true,
       },
@@ -143,7 +143,7 @@ class QuestionView extends Component {
               <li
                 key={id}
                 onClick={() => {
-                  this.getByCategory(parseInt(id) + 1);
+                  this.getByCategory(parseInt(id));
                 }}
               >
                 {this.state.categories[id]}

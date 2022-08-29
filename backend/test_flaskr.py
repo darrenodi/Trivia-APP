@@ -15,8 +15,8 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.username = ""  #Enter your db username
-        self.password = "" #Enter your db password
+        self.username = "postgres"  #Enter your db username
+        self.password = "Tantheta%401" #Enter your db password
         self.database_path = "postgresql://{}:{}@{}/{}".format(
     self.username, self.password, "localhost:8080", self.database_name)
         setup_db(self.app, self.database_path)
@@ -119,18 +119,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'unprocessable')
     
     def test_get_question_search_with_results(self):
-        res = self.client().post('/questions/searchresult', json={'searchTerm': 'Tom'})
+        res = self.client().post('/questions', json={"search": "Tom"})
         data = json.loads(res.data)
-
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['total_questions']>0,True)
         self.assertIsNotNone((data['questions']))
     
     def test_get_question_search_without_results(self):
-        res = self.client().post('/questions/searchresult', json={'searchTerm': 'mkbhd'})
+        res = self.client().post('/questions', json={"search": "mkbhd"})
         data = json.loads(res.data)
-
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['total_questions']==0,True)
@@ -138,12 +136,11 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_get_question_search_error(self):
 
-        res = self.client().post('/questions/searchresults', json={'searchTerm': 'x',})
+        res = self.client().post('/questions', json={"searchterm": 'x',})
         data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 422)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "resource not found")
+        self.assertEqual(data["message"], "unprocessable")
 
     def test_questions_based_on_category(self):
         res = self.client().get('/categories/3/questions')
